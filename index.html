@@ -977,7 +977,7 @@
     </main>
     <section class="bet-strip">
       <div class="cashout-row">
-        <button class="cashout-btn" id="cashoutBtn">CASH OUT $0.00</button>
+        <button class="cashout-btn" id="cashoutBtn">CASH OUT $0</button>
       </div>
       <div class="bet-card"><strong>BALANCE</strong><b id="balance">10,000</b></div>
       <div class="bet-card bet-control">
@@ -1069,6 +1069,7 @@
     let dryBombMoves = 0;
     let pendingBombDrops = 0;
     let gameOver = false;
+    let roundClosed = false;
 
     function colorById(id) {
       return colors.find(c => c.id === id);
@@ -1194,6 +1195,7 @@
       sugarRush = false;
       bonusRunning = false;
       gameOver = false;
+      roundClosed = false;
       quests.forEach(q => {
         q.progress = 0;
         q.done = false;
@@ -1277,8 +1279,8 @@
           } else {
             tile.removeAttribute("data-bomb");
           }
-          if (cell.type === "stripedH") tile.style.setProperty("--stripe-angle", "90deg");
-          if (cell.type === "stripedV") tile.style.setProperty("--stripe-angle", "0deg");
+          if (cell.type === "stripedH") tile.style.setProperty("--stripe-angle", "0deg");
+          if (cell.type === "stripedV") tile.style.setProperty("--stripe-angle", "90deg");
           if (changedKeys.has(key(r, c))) tile.classList.add("falling");
           tile.style.color = cell.type === "rainbow" ? "#fff" : color.color;
           tile.style.setProperty("--fill", cell.type === "rainbow" ? "conic-gradient(#ff4f7b,#ffe45d,#4ff0ba,#55d7ff,#b76cff,#ff4f7b)" : color.fill);
@@ -1309,11 +1311,12 @@
       document.querySelector("#payout").textContent = payout.toLocaleString("en-US");
       const cashoutButton = document.querySelector("#cashoutBtn");
       if (cashoutButton) {
-        cashoutButton.textContent = `CASH OUT $${cashout.toLocaleString("en-US")}.00`;
+        cashoutButton.textContent = `CASH OUT $${cashout.toLocaleString("en-US")}`;
         const locked = hasBombOnBoard();
         cashoutButton.classList.toggle("ready", cashout > 0 && !locked);
         cashoutButton.classList.toggle("locked", locked);
         if (gameOver) cashoutButton.textContent = "GAME OVER";
+        else if (roundClosed) cashoutButton.textContent = "ROUND CLOSED";
         else if (locked) cashoutButton.textContent = "BOMB LOCKED";
       }
       document.querySelector("#eventMeter").style.width = Math.min(100, eventEnergy) + "%";
@@ -1391,7 +1394,7 @@
     }
 
     async function tryMove(a, b) {
-      if (busy || gameOver || !inside(b)) return;
+      if (busy || gameOver || roundClosed || !inside(b)) return;
       if (balance < bet) {
         setToast("Not Enough Balance", "Not enough balance for this Bet. Lower the Bet or cash out before starting a new round.");
         return;
@@ -1446,13 +1449,18 @@
       if (first.type === "rainbow" && second.type === "rainbow") return { cells: allCells(), title: "Rainbow Board Clear" };
       if (first.type === "rainbow") return withSwapCells(rainbowEffect(first, second), a, b);
       if (second.type === "rainbow") return withSwapCells(rainbowEffect(second, first), a, b);
-      if (first.type === "stripedH" || first.type === "stripedV" || second.type === "stripedH" || second.type === "stripedV") {
-        if (first.type === "wrapped" || second.type === "wrapped") return withSwapCells({ cells: bigCross(a), title: "Striped Wrapped Blast" }, a, b);
-        return withSwapCells({ cells: uniqueCells([...rowCells(a.r), ...colCells(a.c)]), title: "Double Striped Blast" }, a, b);
+      if (isSpecial(first) && isSpecial(second)) {
+        if ((first.type === "stripedH" || first.type === "stripedV" || second.type === "stripedH" || second.type === "stripedV") &&
+            (first.type === "wrapped" || second.type === "wrapped")) return withSwapCells({ cells: bigCross(first.type === "wrapped" ? b : a), title: "Striped Wrapped Blast" }, a, b);
+        if ((first.type === "stripedH" || first.type === "stripedV") && (second.type === "stripedH" || second.type === "stripedV")) {
+          return withSwapCells({ cells: uniqueCells([...lineCells(first, b), ...lineCells(second, a)]), title: "Double Striped Blast" }, a, b);
+        }
       }
       if (first.type === "wrapped" && second.type === "wrapped") return withSwapCells({ cells: radiusCells(a, 2), title: "Double Wrapped Blast" }, a, b);
       if (first.type === "wrapped") return withSwapCells({ cells: radiusCells(b, 1), title: "Wrapped Blast" }, a, b);
       if (second.type === "wrapped") return withSwapCells({ cells: radiusCells(a, 1), title: "Wrapped Blast" }, a, b);
+      if (isSpecial(first)) return withSwapCells(specialEffectAt(first, b), a, b);
+      if (isSpecial(second)) return withSwapCells(specialEffectAt(second, a), a, b);
       return null;
     }
 
@@ -1472,6 +1480,19 @@
         return { cells: uniqueCells(same.flatMap(cell => radiusCells(cell, 1))), title: "Rainbow Wrapped Blast" };
       }
       return { cells: cellsOfColor(other.color), title: "Rainbow Color Blast" };
+    }
+
+    function specialEffectAt(cell, pos) {
+      if (!cell) return { cells: [], title: "Special Candy Blast" };
+      if (cell.type === "stripedH") return { cells: rowCells(pos.r), title: "Striped Row Blast" };
+      if (cell.type === "stripedV") return { cells: colCells(pos.c), title: "Striped Column Blast" };
+      if (cell.type === "wrapped") return { cells: radiusCells(pos, 1), title: "Wrapped Blast" };
+      if (cell.type === "rainbow") return { cells: cellsOfColor(cell.color), title: "Rainbow Color Blast" };
+      return { cells: [pos], title: "Special Candy Blast" };
+    }
+
+    function lineCells(cell, pos) {
+      return cell?.type === "stripedV" ? colCells(pos.c) : rowCells(pos.r);
     }
 
     async function resolveSpecialEffect(effect, fallbackTitle) {
@@ -1589,6 +1610,7 @@
         if (original.type === "stripedH") result.push(...rowCells(cell.r));
         if (original.type === "stripedV") result.push(...colCells(cell.c));
         if (original.type === "wrapped") result.push(...radiusCells(cell, 1));
+        if (original.type === "rainbow") result.push(...cellsOfColor(original.color));
       });
       return markCells(uniqueCells(result).filter(cell => !sameCell(cell, protectedCell)));
     }
@@ -1699,6 +1721,8 @@
       payout += cashout;
       setToast("Cashout Complete", `You cashed out this round's Pot: ${cashout}. It has been added to Balance.`);
       cashout = 0;
+      roundClosed = true;
+      document.querySelector("#banner").textContent = "CASHED OUT";
       playSound("goal");
       updateHud();
     }
@@ -1731,18 +1755,19 @@
     }
 
     function rollBombDrops() {
-      if (totalMoves < 3) return 0;
+      if (totalMoves < 2) return 0;
       const currentBombs = countBombs();
-      if (currentBombs >= 4) return 0;
+      if (currentBombs >= 7) return 0;
       const potX = bet > 0 ? cashout / bet : 0;
-      let chance = 0.025;
-      if (potX > 60) chance = 0.10;
-      else if (potX > 30) chance = 0.06;
-      if (dryBombMoves >= 5) chance += 0.05;
+      let chance = 0.07;
+      if (potX > 60) chance = 0.22;
+      else if (potX > 30) chance = 0.15;
+      if (dryBombMoves >= 4) chance += 0.08;
       const hit = Math.random() < chance;
       if (hit) {
         dryBombMoves = 0;
-        return Math.min(currentBombs <= 1 && Math.random() < 0.35 ? 2 : 1, 4 - currentBombs);
+        const drops = Math.random() < 0.22 ? 3 : Math.random() < 0.58 ? 2 : 1;
+        return Math.min(drops, 7 - currentBombs);
       }
       dryBombMoves += 1;
       return 0;
