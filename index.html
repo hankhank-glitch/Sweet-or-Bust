@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>甜糖彩金局</title>
+  <title>Sweet or Bust</title>
   <style>
     :root {
       --bg-top: #87e3d4;
@@ -952,8 +952,8 @@
       <div class="brand">
         <div class="logo" aria-hidden="true"></div>
         <div>
-          <h1>甜糖彩金局</h1>
-          <p class="tagline">每手扣 Bet，完成懸賞累積 Pot，炸彈在場禁止 Cashout。</p>
+          <h1>Sweet or Bust</h1>
+          <p class="tagline">Each move costs 1 Bet. Complete bounties to build the Pot. Bombs block Cashout.</p>
         </div>
       </div>
     </header>
@@ -961,17 +961,17 @@
     <main>
       <aside class="side">
         <section class="mission-panel">
-          <h2>懸賞目標</h2>
+          <h2>Bounty Goals</h2>
           <div id="missions"></div>
         </section>
       </aside>
 
-      <section class="stage" aria-label="糖果盤面">
-        <div class="board-title"><span class="line"></span><b id="banner">拖曳開局</b><span class="line"></span></div>
+      <section class="stage" aria-label="Candy board">
+        <div class="board-title"><span class="line"></span><b id="banner">Drag to Start</b><span class="line"></span></div>
         <div class="board-wrap">
           <div class="board" id="board" aria-live="polite"></div>
           <div class="float-layer" id="floatLayer"></div>
-          <div class="praise" id="praise">漂亮連鎖！</div>
+          <div class="praise" id="praise">Sweet Chain!</div>
         </div>
       </section>
     </main>
@@ -986,19 +986,19 @@
         <button class="round-btn" id="betUp">+</button>
       </div>
       <div class="bet-card intro">
-        <strong>遊戲介紹</strong>
-        每次移動扣 1 Bet。消除不賠付，只累積懸賞；完成懸賞後 Pot 增加。炸彈在場時不能 Cashout。
+        <strong>How to Play</strong>
+        Each move costs 1 Bet. Clears do not pay directly; they progress bounties. Complete bounties to grow the Pot. Bombs on the board block Cashout.
       </div>
       <div class="actions">
         <button class="icon-action" id="hintBtn">▶▶</button>
         <button class="icon-action" id="resetBtn">☰</button>
-        <button hidden id="shuffleBtn">洗牌</button>
+        <button hidden id="shuffleBtn">Shuffle</button>
       </div>
     </section>
     <div hidden>
       <i id="eventMeter"></i>
       <span id="eventText"></span>
-      <strong id="toastTitle">準備</strong>
+      <strong id="toastTitle">Ready</strong>
       <span id="toastText"></span>
       <span id="roundScore">0</span>
       <span id="jar">0</span>
@@ -1025,23 +1025,23 @@
     const floatLayer = document.querySelector("#floatLayer");
     const praise = document.querySelector("#praise");
     const colors = [
-      { id: "red", label: "紅色", value: 10, color: "#f42325", fill: "linear-gradient(135deg,#ff726a,#e50009)", shape: "bean", weight: 22 },
-      { id: "blue", label: "藍色", value: 12, color: "#1789f4", fill: "linear-gradient(135deg,#55d8ff,#005bdc)", shape: "pill", weight: 21 },
-      { id: "orange", label: "橘色", value: 13, color: "#ff8b16", fill: "linear-gradient(135deg,#ffc05f,#f26d00)", shape: "oval", weight: 20 },
-      { id: "green", label: "綠色", value: 15, color: "#20c92d", fill: "linear-gradient(135deg,#84f65a,#079616)", shape: "square", weight: 19 },
-      { id: "yellow", label: "黃色", value: 18, color: "#ffd21f", fill: "linear-gradient(135deg,#fff37f,#f5a600)", shape: "drop", weight: 18 },
-      { id: "purple", label: "紫色", value: 22, color: "#c83cff", fill: "linear-gradient(135deg,#f07cff,#9f1bd8)", shape: "crown", weight: 17 }
+      { id: "red", label: "Red", value: 10, color: "#f42325", fill: "linear-gradient(135deg,#ff726a,#e50009)", shape: "bean", weight: 22 },
+      { id: "blue", label: "Blue", value: 12, color: "#1789f4", fill: "linear-gradient(135deg,#55d8ff,#005bdc)", shape: "pill", weight: 21 },
+      { id: "orange", label: "Orange", value: 13, color: "#ff8b16", fill: "linear-gradient(135deg,#ffc05f,#f26d00)", shape: "oval", weight: 20 },
+      { id: "green", label: "Green", value: 15, color: "#20c92d", fill: "linear-gradient(135deg,#84f65a,#079616)", shape: "square", weight: 19 },
+      { id: "yellow", label: "Yellow", value: 18, color: "#ffd21f", fill: "linear-gradient(135deg,#fff37f,#f5a600)", shape: "drop", weight: 18 },
+      { id: "purple", label: "Purple", value: 22, color: "#c83cff", fill: "linear-gradient(135deg,#f07cff,#9f1bd8)", shape: "crown", weight: 17 }
     ];
     const quests = [
-      { color: "yellow", title: "削掉黃色糖", need: 18, progress: 0, done: false, multiplier: 5 },
-      { color: "purple", title: "削掉紫色糖", need: 16, progress: 0, done: false, multiplier: 10 },
-      { color: "green", title: "削掉綠色糖", need: 14, progress: 0, done: false, multiplier: 20 }
+      { color: "yellow", title: "Clear Yellow Candies", need: 18, progress: 0, done: false, multiplier: 5 },
+      { color: "purple", title: "Clear Purple Candies", need: 16, progress: 0, done: false, multiplier: 10 },
+      { color: "green", title: "Clear Green Candies", need: 14, progress: 0, done: false, multiplier: 20 }
     ];
     const questPool = [
       ["red", 12, 5], ["blue", 12, 6], ["orange", 14, 8],
       ["green", 14, 10], ["yellow", 16, 15], ["purple", 16, 20]
     ];
-    const praiseLines = ["漂亮連鎖！", "大獎手感！", "甜蜜暴擊！", "彩金要來了！"];
+    const praiseLines = ["Sweet Chain!", "Jackpot Feeling!", "Sweet Hit!", "Big Pot Incoming!"];
 
     let grid = [];
     let tiles = [];
@@ -1207,8 +1207,8 @@
       renderMissions();
       refreshAllQuests();
       updateHud();
-      setToast("準備開局", "每次移動扣 1 Bet，消除只累積懸賞；完成懸賞會把倍率獎勵累積到 Pot。");
-      document.querySelector("#banner").textContent = "拖曳開局";
+      setToast("Ready to Play", "Each move costs 1 Bet. Clears only progress bounties; multiplier rewards are added to the Pot.");
+      document.querySelector("#banner").textContent = "Drag to Start";
     }
 
     function createCleanGrid() {
@@ -1282,34 +1282,34 @@
           if (changedKeys.has(key(r, c))) tile.classList.add("falling");
           tile.style.color = cell.type === "rainbow" ? "#fff" : color.color;
           tile.style.setProperty("--fill", cell.type === "rainbow" ? "conic-gradient(#ff4f7b,#ffe45d,#4ff0ba,#55d7ff,#b76cff,#ff4f7b)" : color.fill);
-          tile.setAttribute("aria-label", cell.type === "rainbow" ? "彩虹糖" : `${color.label} ${specialName(cell.type)}`.trim());
+          tile.setAttribute("aria-label", cell.type === "rainbow" ? "Rainbow Candy" : `${color.label} ${specialName(cell.type)}`.trim());
           tile.innerHTML = `<span class="candy shape-${cell.type === "rainbow" ? "bomb" : color.shape}"></span>`;
         }
       }
     }
 
     function specialName(type) {
-      if (type === "stripedH" || type === "stripedV") return "條紋糖";
-      if (type === "wrapped") return "包裝糖";
-      if (type === "rainbow") return "彩虹糖";
+      if (type === "stripedH" || type === "stripedV") return "Striped Candy";
+      if (type === "wrapped") return "Wrapped Candy";
+      if (type === "rainbow") return "Rainbow Candy";
       return "";
     }
 
     function updateHud() {
-      document.querySelector("#score").textContent = score.toLocaleString("zh-TW");
+      document.querySelector("#score").textContent = score.toLocaleString("en-US");
       document.querySelector("#moves").textContent = "∞";
       document.querySelector("#combo").textContent = "x" + combo;
-      document.querySelector("#roundScore").textContent = roundScore.toLocaleString("zh-TW");
+      document.querySelector("#roundScore").textContent = roundScore.toLocaleString("en-US");
       document.querySelector("#jar").textContent = jar;
-      document.querySelector("#balance").textContent = balance.toLocaleString("zh-TW");
-      document.querySelector("#bet").textContent = bet.toLocaleString("zh-TW");
+      document.querySelector("#balance").textContent = balance.toLocaleString("en-US");
+      document.querySelector("#bet").textContent = bet.toLocaleString("en-US");
       const betLocked = totalMoves > 0;
       document.querySelector("#betDown").disabled = betLocked;
       document.querySelector("#betUp").disabled = betLocked;
-      document.querySelector("#payout").textContent = payout.toLocaleString("zh-TW");
+      document.querySelector("#payout").textContent = payout.toLocaleString("en-US");
       const cashoutButton = document.querySelector("#cashoutBtn");
       if (cashoutButton) {
-        cashoutButton.textContent = `CASH OUT $${cashout.toLocaleString("zh-TW")}.00`;
+        cashoutButton.textContent = `CASH OUT $${cashout.toLocaleString("en-US")}.00`;
         const locked = hasBombOnBoard();
         cashoutButton.classList.toggle("ready", cashout > 0 && !locked);
         cashoutButton.classList.toggle("locked", locked);
@@ -1318,8 +1318,8 @@
       }
       document.querySelector("#eventMeter").style.width = Math.min(100, eventEnergy) + "%";
       document.querySelector("#eventText").textContent = sugarRush
-        ? "糖雨已充能：下一次成功交換會混入條紋糖。"
-        : "消除會累積糖雨能量。";
+        ? "Sugar Rush charged: the next successful swap will add striped candies."
+        : "Clears build Sugar Rush energy.";
     }
 
     function renderMissions() {
@@ -1331,7 +1331,7 @@
         row.className = "quest";
         row.innerHTML = `
           <div class="mini" style="color:${color.color};background:${color.fill}"><span class="candy shape-${color.shape}"></span></div>
-          <div><strong>${q.title}</strong><span><b class="multiplier">x${q.multiplier}</b>目標：${q.need}</span><div class="bar"><i style="width:${Math.min(100, q.progress / q.need * 100)}%"></i></div></div>
+          <div><strong>${q.title}</strong><span><b class="multiplier">x${q.multiplier}</b>Goal: ${q.need}</span><div class="bar"><i style="width:${Math.min(100, q.progress / q.need * 100)}%"></i></div></div>
           <span class="badge">${Math.min(q.progress, q.need)}/${q.need}</span>
         `;
         wrap.appendChild(row);
@@ -1393,7 +1393,7 @@
     async function tryMove(a, b) {
       if (busy || gameOver || !inside(b)) return;
       if (balance < bet) {
-        setToast("餘額不足", "餘額不足以支付本次壓注，請降低 BET 或提款後重開。");
+        setToast("Not Enough Balance", "Not enough balance for this Bet. Lower the Bet or cash out before starting a new round.");
         return;
       }
       busy = true;
@@ -1423,15 +1423,15 @@
         swap(a, b);
         syncBoard();
         playSound("fail");
-        setToast("沒有消除", `本次移動已扣 ${bet}，換個方向湊三消。`);
-        document.querySelector("#banner").textContent = "再試一手";
+        setToast("No Match", `This move cost ${bet}. Try another direction to make a match.`);
+        document.querySelector("#banner").textContent = "Try Again";
         busy = false;
         return;
       }
       if (comboEffect) await resolveSpecialEffect(comboEffect, "SPECIAL COMBO");
       await resolveCascade(findMatches(), { source: b, alternateSource: a });
       if (!findMove()) {
-        setToast("自動洗牌", "盤面沒有可交換組合，保留懸賞進度重新排列。");
+        setToast("Auto Shuffle", "No valid swaps remain. The board was reshuffled and bounty progress was kept.");
         shuffleGrid();
       }
       busy = false;
@@ -1443,16 +1443,16 @@
       const first = grid[b.r][b.c];
       const second = grid[a.r][a.c];
       if (!isSpecial(first) && !isSpecial(second)) return null;
-      if (first.type === "rainbow" && second.type === "rainbow") return { cells: allCells(), title: "彩虹清盤" };
+      if (first.type === "rainbow" && second.type === "rainbow") return { cells: allCells(), title: "Rainbow Board Clear" };
       if (first.type === "rainbow") return withSwapCells(rainbowEffect(first, second), a, b);
       if (second.type === "rainbow") return withSwapCells(rainbowEffect(second, first), a, b);
       if (first.type === "stripedH" || first.type === "stripedV" || second.type === "stripedH" || second.type === "stripedV") {
-        if (first.type === "wrapped" || second.type === "wrapped") return withSwapCells({ cells: bigCross(a), title: "條紋包裝爆" }, a, b);
-        return withSwapCells({ cells: uniqueCells([...rowCells(a.r), ...colCells(a.c)]), title: "雙條紋爆" }, a, b);
+        if (first.type === "wrapped" || second.type === "wrapped") return withSwapCells({ cells: bigCross(a), title: "Striped Wrapped Blast" }, a, b);
+        return withSwapCells({ cells: uniqueCells([...rowCells(a.r), ...colCells(a.c)]), title: "Double Striped Blast" }, a, b);
       }
-      if (first.type === "wrapped" && second.type === "wrapped") return withSwapCells({ cells: radiusCells(a, 2), title: "雙包裝爆" }, a, b);
-      if (first.type === "wrapped") return withSwapCells({ cells: radiusCells(b, 1), title: "包裝爆" }, a, b);
-      if (second.type === "wrapped") return withSwapCells({ cells: radiusCells(a, 1), title: "包裝爆" }, a, b);
+      if (first.type === "wrapped" && second.type === "wrapped") return withSwapCells({ cells: radiusCells(a, 2), title: "Double Wrapped Blast" }, a, b);
+      if (first.type === "wrapped") return withSwapCells({ cells: radiusCells(b, 1), title: "Wrapped Blast" }, a, b);
+      if (second.type === "wrapped") return withSwapCells({ cells: radiusCells(a, 1), title: "Wrapped Blast" }, a, b);
       return null;
     }
 
@@ -1464,14 +1464,14 @@
       if (other.type === "stripedH" || other.type === "stripedV") {
         const same = cellsOfColor(other.color);
         same.forEach(cell => grid[cell.r][cell.c].type = Math.random() > 0.5 ? "stripedH" : "stripedV");
-        return { cells: uniqueCells(same.flatMap(cell => grid[cell.r][cell.c].type === "stripedH" ? rowCells(cell.r) : colCells(cell.c))), title: "彩虹條紋爆" };
+        return { cells: uniqueCells(same.flatMap(cell => grid[cell.r][cell.c].type === "stripedH" ? rowCells(cell.r) : colCells(cell.c))), title: "Rainbow Striped Blast" };
       }
       if (other.type === "wrapped") {
         const same = cellsOfColor(other.color);
         same.forEach(cell => grid[cell.r][cell.c].type = "wrapped");
-        return { cells: uniqueCells(same.flatMap(cell => radiusCells(cell, 1))), title: "彩虹包裝爆" };
+        return { cells: uniqueCells(same.flatMap(cell => radiusCells(cell, 1))), title: "Rainbow Wrapped Blast" };
       }
-      return { cells: cellsOfColor(other.color), title: "彩虹同色爆" };
+      return { cells: cellsOfColor(other.color), title: "Rainbow Color Blast" };
     }
 
     async function resolveSpecialEffect(effect, fallbackTitle) {
@@ -1485,7 +1485,7 @@
       updateQuests(removed);
       addFloat(`+${earned}`, averagePoint(removed));
       playSound("special", 2);
-      setToast("特殊糖引爆", `${effect.title || fallbackTitle} 削掉 ${removed.length} 顆，懸賞進度已累積。`);
+      setToast("Special Candy Blast", `${effect.title || fallbackTitle} cleared ${removed.length} candies. Bounty progress was added.`);
       updateHud();
       renderMissions();
       await removeAndCollapse(removed);
@@ -1507,10 +1507,10 @@
         eventEnergy += expanded.length * 2 + chain * 4;
         updateQuests(expanded);
         if (special) grid[special.r][special.c] = makeCell(special.color, special.type);
-        document.querySelector("#banner").textContent = chain === 1 ? "甜蜜命中" : `連鎖 ${chain}`;
-        addFloat("消除", averagePoint(expanded.length ? expanded : matches.cells));
+        document.querySelector("#banner").textContent = chain === 1 ? "Sweet Hit" : `Chain ${chain}`;
+        addFloat("Clear", averagePoint(expanded.length ? expanded : matches.cells));
         playSound(chain === 1 ? "clear" : "combo", chain);
-        setToast(chain === 1 ? "成功消除" : "連鎖消除", `削掉 ${expanded.length} 顆，沒有直接賠付，進度累積到懸賞。`);
+        setToast(chain === 1 ? "Clear Hit" : "Chain Clear", `Cleared ${expanded.length} candies. No direct payout; progress goes to bounties.`);
         updateHud();
         renderMissions();
         await removeAndCollapse(expanded);
@@ -1654,7 +1654,7 @@
           roundScore += bonus;
           cashout += bonus;
           playSound("goal");
-          setToast("倍率懸賞", `${q.title} 完成，BET x${q.multiplier} = +${bonus}，已累積到 Pot。`);
+          setToast("Multiplier Bounty", `${q.title} complete. BET x${q.multiplier} = +${bonus} added to the Pot.`);
           refreshQuest(index);
         }
       });
@@ -1675,7 +1675,7 @@
       const colorInfo = colorById(color);
       quests[index] = {
         color,
-        title: `削掉${colorInfo.label}糖`,
+        title: `Clear ${colorInfo.label} Candies`,
         need,
         progress: 0,
         done: false,
@@ -1686,18 +1686,18 @@
     function collectCashout() {
       ensureAudio();
       if (hasBombOnBoard()) {
-        setToast("炸彈鎖定", "場上有炸彈，必須先消除炸彈才能 Cashout。");
+        setToast("Bomb Locked", "A bomb is on the board. Clear every bomb before Cashout.");
         playSound("fail");
         return;
       }
       if (cashout <= 0 || busy) {
-        setToast("尚無可領取", "完成消除或倍率懸賞後，Cashout 會累積可提款金額。");
+        setToast("Nothing to Cash Out", "Complete bounty goals to build your Cashout amount.");
         playSound("fail");
         return;
       }
       balance += cashout;
       payout += cashout;
-      setToast("成功領取", `已領取本輪 Pot ${cashout}，已加入餘額。`);
+      setToast("Cashout Complete", `You cashed out this round's Pot: ${cashout}. It has been added to Balance.`);
       cashout = 0;
       playSound("goal");
       updateHud();
@@ -1772,7 +1772,7 @@
       cashout = 0;
       payout = 0;
       document.querySelector("#banner").textContent = "GAME OVER";
-      setToast("GAME OVER", "炸彈倒數歸零，遊戲結束，Pot 已歸零。請開新局繼續。");
+      setToast("GAME OVER", "A bomb reached 0. Game over. The Pot was reset. Start a new round to continue.");
       playSound("fail");
       updateHud();
     }
@@ -1792,7 +1792,7 @@
       clearSelection();
       tiles[move.from.r][move.from.c].classList.add("selected");
       tiles[move.to.r][move.to.c].classList.add("selected");
-      setToast("提示", "發光的兩顆可以交換，提示不扣 Bet。");
+      setToast("Hint", "The highlighted candies can be swapped. Hints do not cost Bet.");
       playSound("swap");
       setTimeout(clearSelection, 900);
     }
@@ -1807,7 +1807,7 @@
       }
       if (findMatches().cells.length || !findMove()) createCleanGrid();
       syncBoard(allCells());
-      document.querySelector("#banner").textContent = "盤面洗牌";
+      document.querySelector("#banner").textContent = "Board Shuffled";
       updateHud();
     }
 
@@ -1833,8 +1833,8 @@
     }
 
     function endGame() {
-      document.querySelector("#banner").textContent = "餘額不足";
-      setToast("餘額不足", "本局沒有步數限制，但需要足夠餘額才能繼續移動。");
+      document.querySelector("#banner").textContent = "Not Enough Balance";
+      setToast("Not Enough Balance", "There is no move limit, but you need enough Balance to keep moving.");
     }
 
     function animateSwap(a, b) {
@@ -1971,7 +1971,7 @@
       ensureAudio();
       if (!busy) {
         shuffleGrid();
-        setToast("洗牌", "盤面重新排列，不扣 Bet。");
+        setToast("Shuffle", "The board was rearranged. No Bet was charged.");
         playSound("swap");
       }
     });

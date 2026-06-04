@@ -1,6 +1,6 @@
 # Sweet or Bust
 
-一款糖果主題的 crush / cashout 博弈原型。
+A candy-themed crush / cashout gambling prototype.
 
 ## Play
 
@@ -16,4 +16,3 @@ Open `index.html` in a browser.
 - Bombs have 5 turns. Each move reduces the countdown by 1.
 - If a bomb reaches 0, the game ends and the Pot is reset.
 - Bet is locked after the first move until a new game starts.
-
