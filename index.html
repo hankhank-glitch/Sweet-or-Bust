@@ -663,6 +663,19 @@
       animation: cashPulse 980ms ease-in-out infinite;
     }
 
+    .cashout-btn.hot {
+      color: #fff4b8;
+      border-color: rgba(255, 236, 120, 0.96);
+      background:
+        radial-gradient(circle at 50% -35%, rgba(255, 245, 123, 0.52), transparent 48%),
+        linear-gradient(180deg, #4d2a6d, #20113e);
+      box-shadow: 0 0 34px rgba(255, 216, 102, 0.72), 0 0 70px rgba(255, 96, 188, 0.22), inset 0 0 22px rgba(255, 216, 102, 0.2);
+    }
+
+    .cashout-btn.mega {
+      animation: cashPulse 620ms ease-in-out infinite, jackpotGlow 1.2s ease-in-out infinite;
+    }
+
     .cashout-btn.locked {
       color: #afa4bd;
       border-color: rgba(255,255,255,0.22);
@@ -765,6 +778,17 @@
       text-shadow: 0 4px 13px rgba(0,0,0,0.55);
       white-space: nowrap;
       animation: floatUp 850ms ease forwards;
+    }
+
+    .float.money {
+      padding: 6px 14px;
+      border-radius: 999px;
+      color: #3a1830;
+      background: linear-gradient(180deg, #fff6a9, #ffcf3d);
+      border: 2px solid rgba(255,255,255,0.82);
+      box-shadow: 0 0 28px rgba(255,216,102,0.82), 0 12px 26px rgba(0,0,0,0.22);
+      font-size: 27px;
+      animation: moneyPop 1050ms ease forwards;
     }
 
     .spark {
@@ -891,6 +915,18 @@
       from { opacity: 0; transform: translate(-50%, 4px) scale(0.8); }
       18% { opacity: 1; }
       to { opacity: 0; transform: translate(-50%, -62px) scale(1.08); }
+    }
+
+    @keyframes moneyPop {
+      0% { opacity: 0; transform: translate(-50%, 10px) scale(0.72); }
+      18% { opacity: 1; transform: translate(-50%, -8px) scale(1.16); }
+      70% { opacity: 1; transform: translate(-50%, -44px) scale(1); }
+      100% { opacity: 0; transform: translate(-50%, -78px) scale(1.18); }
+    }
+
+    @keyframes jackpotGlow {
+      0%, 100% { filter: saturate(1.08) brightness(1); }
+      50% { filter: saturate(1.35) brightness(1.18); }
     }
 
     @keyframes sparkBurst {
@@ -1033,15 +1069,15 @@
       { id: "purple", label: "Purple", value: 22, color: "#c83cff", fill: "linear-gradient(135deg,#f07cff,#9f1bd8)", shape: "crown", weight: 17 }
     ];
     const quests = [
-      { color: "yellow", title: "Clear Yellow Candies", need: 18, progress: 0, done: false, multiplier: 5 },
-      { color: "purple", title: "Clear Purple Candies", need: 16, progress: 0, done: false, multiplier: 10 },
-      { color: "green", title: "Clear Green Candies", need: 14, progress: 0, done: false, multiplier: 20 }
+      { color: "yellow", title: "Clear Yellow Candies", need: 16, progress: 0, done: false, multiplier: 10 },
+      { color: "purple", title: "Clear Purple Candies", need: 15, progress: 0, done: false, multiplier: 20 },
+      { color: "green", title: "Clear Green Candies", need: 13, progress: 0, done: false, multiplier: 35 }
     ];
     const questPool = [
-      ["red", 12, 5], ["blue", 12, 6], ["orange", 14, 8],
-      ["green", 14, 10], ["yellow", 16, 15], ["purple", 16, 20]
+      ["red", 11, 10], ["blue", 11, 12], ["orange", 12, 15],
+      ["green", 13, 20], ["yellow", 14, 30], ["purple", 15, 50]
     ];
-    const praiseLines = ["Sweet Chain!", "Jackpot Feeling!", "Sweet Hit!", "Big Pot Incoming!"];
+    const praiseLines = ["Sweet Chain!", "Jackpot Feeling!", "Sweet Hit!", "Big Pot Incoming!", "Cashout Climbing!"];
 
     let grid = [];
     let tiles = [];
@@ -1311,13 +1347,16 @@
       document.querySelector("#payout").textContent = payout.toLocaleString("en-US");
       const cashoutButton = document.querySelector("#cashoutBtn");
       if (cashoutButton) {
-        cashoutButton.textContent = `CASH OUT $${cashout.toLocaleString("en-US")}`;
+        const potX = bet > 0 ? Math.floor(cashout / bet) : 0;
+        cashoutButton.textContent = `CASH OUT $${cashout.toLocaleString("en-US")}${potX ? ` · ${potX}x` : ""}`;
         const locked = hasBombOnBoard();
+        cashoutButton.classList.toggle("hot", potX >= 10 && !locked && !gameOver && !roundClosed);
+        cashoutButton.classList.toggle("mega", potX >= 30 && !locked && !gameOver && !roundClosed);
         cashoutButton.classList.toggle("ready", cashout > 0 && !locked);
         cashoutButton.classList.toggle("locked", locked);
         if (gameOver) cashoutButton.textContent = "GAME OVER";
         else if (roundClosed) cashoutButton.textContent = "ROUND CLOSED";
-        else if (locked) cashoutButton.textContent = "BOMB LOCKED";
+        else if (locked) cashoutButton.textContent = `BOMB LOCKED · ${countBombs()}`;
       }
       document.querySelector("#eventMeter").style.width = Math.min(100, eventEnergy) + "%";
       document.querySelector("#eventText").textContent = sugarRush
@@ -1675,8 +1714,16 @@
           score += bonus;
           roundScore += bonus;
           cashout += bonus;
-          playSound("goal");
-          setToast("Multiplier Bounty", `${q.title} complete. BET x${q.multiplier} = +${bonus} added to the Pot.`);
+          const potX = bet > 0 ? Math.floor(cashout / bet) : 0;
+          playSound("goal", 1.6);
+          setTimeout(() => playSound("bonus", 1.2), 90);
+          addMoneyFloat(`+$${bonus.toLocaleString("en-US")} · ${q.multiplier}x`, { x: board.clientWidth / 2, y: board.clientHeight * 0.28 });
+          praise.textContent = `POT ${potX}x`;
+          praise.classList.remove("show");
+          void praise.offsetWidth;
+          praise.classList.add("show");
+          document.querySelector("#banner").textContent = `BOUNTY HIT · ${potX}x POT`;
+          setToast("BIG BOUNTY HIT", `${q.title} complete. $${bonus.toLocaleString("en-US")} was added to the Pot.`);
           refreshQuest(index);
         }
       });
@@ -1755,19 +1802,19 @@
     }
 
     function rollBombDrops() {
-      if (totalMoves < 2) return 0;
+      if (totalMoves < 1) return 0;
       const currentBombs = countBombs();
-      if (currentBombs >= 7) return 0;
+      if (currentBombs >= 9) return 0;
       const potX = bet > 0 ? cashout / bet : 0;
-      let chance = 0.07;
-      if (potX > 60) chance = 0.22;
-      else if (potX > 30) chance = 0.15;
-      if (dryBombMoves >= 4) chance += 0.08;
+      let chance = 0.12;
+      if (potX > 60) chance = 0.40;
+      else if (potX > 30) chance = 0.28;
+      if (dryBombMoves >= 3) chance += 0.12;
       const hit = Math.random() < chance;
       if (hit) {
         dryBombMoves = 0;
-        const drops = Math.random() < 0.22 ? 3 : Math.random() < 0.58 ? 2 : 1;
-        return Math.min(drops, 7 - currentBombs);
+        const drops = Math.random() < 0.28 ? 3 : Math.random() < 0.68 ? 2 : 1;
+        return Math.min(drops, 9 - currentBombs);
       }
       dryBombMoves += 1;
       return 0;
@@ -1979,6 +2026,16 @@
       span.style.top = point.y + "px";
       floatLayer.appendChild(span);
       setTimeout(() => span.remove(), 900);
+    }
+
+    function addMoneyFloat(text, point) {
+      const span = document.createElement("span");
+      span.className = "float money";
+      span.textContent = text;
+      span.style.left = point.x + "px";
+      span.style.top = point.y + "px";
+      floatLayer.appendChild(span);
+      setTimeout(() => span.remove(), 1100);
     }
 
     function setToast(title, text) {
